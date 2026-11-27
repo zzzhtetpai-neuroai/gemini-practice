@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gemini Practice
 
-## Getting Started
+A simple web app that asks Google's Gemini AI a question and shows the answer, built with Next.js, React, TypeScript and Tailwind CSS, and deployed on Vercel.
 
-First, run the development server:
+Live demo: https://gemini-practice-sage.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+- Type a question and get an answer from Gemini
+- Shows "読み込み中..." (loading) while waiting for the answer
+- Clear error messages (missing API key, Gemini errors, network errors)
+- API key stays on the server and is never sent to the browser
+- Works on PC and smartphone
+
+## How it works
+
+```
+Browser (app/page.tsx)
+   │ 1. sends the question with fetch → POST /api/gemini
+   ↓
+Next.js server (app/api/gemini/route.ts)   ← reads GEMINI_API_KEY from environment variables
+   │ 2. calls the Gemini API with the key
+   ↓
+Google Gemini API
+   │ 3. returns the answer
+   ↓
+Next.js server → returns the answer as JSON → shown on the page
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `app/page.tsx` runs in the browser (Client Component): input box, send button, answer area.
+- `app/api/gemini/route.ts` runs on the server (API Route): uses the `@google/genai` SDK to call Gemini.
+- The API key is stored in `.env.local` locally (excluded from Git by `.gitignore`) and in Vercel's Environment Variables in production.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Screenshots
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| PC | Smartphone |
+|---|---|
+| <img src="docs/pc.png" width="600"> | <img src="docs/phone.png" width="250"> |
 
-## Learn More
+## Tech stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js (App Router)
+- React + TypeScript
+- Tailwind CSS
+- Google Gen AI SDK (`@google/genai`)
+- Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Run locally
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Get an API key from [Google AI Studio](https://aistudio.google.com/)
+2. Create `.env.local` in the project root:
 
-## Deploy on Vercel
+```
+GEMINI_API_KEY=your-api-key
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Install and start:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+npm install
+npm run dev
+```
+
+4. Open http://localhost:3000
+
+## Deploy
+
+Push to GitHub, import the repository in Vercel, add `GEMINI_API_KEY` in Environment Variables, and deploy. Every push to `main` redeploys automatically.
+
+## Possible improvements
+
+- Keep chat history
+- Disable the send button while waiting
+- Render Markdown in answers (bold, lists)
+- Rate limiting
+- User authentication to protect the API route
